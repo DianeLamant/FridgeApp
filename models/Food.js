@@ -7,9 +7,13 @@ const FoodSchema = mongoose.Schema({
     },
     expiryDate: {
         type: Date,
-        required: true
+        required: false
     },
     openingDate: {
+        type: Date,
+        required: false
+    },
+    purchaseDate: {
         type: Date,
         required: false
     },
@@ -19,7 +23,8 @@ const FoodSchema = mongoose.Schema({
     },
     fridgeId: {
         type: mongoose.Schema.ObjectId, 
-        ref: 'Fridge'
+        ref: 'Fridge',
+        required: true
     }
 })
 

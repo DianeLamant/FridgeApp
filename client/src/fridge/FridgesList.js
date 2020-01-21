@@ -4,7 +4,7 @@ import FridgeRow from './FridgeRow';
 function FridgesList(props) {
 
     const token = props.location.state.token;
-    const [ fridges, setFridges ] = useState({});
+    const [ fridges, setFridges ] = useState([]);
     const [ addFridge, setAddFridge ] = useState(false);
     const [ fridgeName, setFridgeName ] = useState({name: ''});
     
@@ -17,8 +17,9 @@ function FridgesList(props) {
             },
         })
             .then((res) => res.json())
-            .then(function(fridges) {
-                setFridges(fridges);
+            .then(function(data) {
+                console.log('les fridges:', data);
+                setFridges(data);
             })
     }, [])
 
@@ -34,6 +35,10 @@ function FridgesList(props) {
             .then((res) => res.json())
             .then(function(fridge) {
                 setAddFridge(false);
+                setFridges(prevState => {
+                    return [...prevState, fridge];
+                })
+                // props.history.push(`/fridge/${fridge.name}`, {fridge: fridge});
             })
     }
 
@@ -41,14 +46,20 @@ function FridgesList(props) {
         setFridgeName({name: value})
     }
 
+    const fridgeDeleted = fridgeId => {
+        console.log(`I delete: ${fridgeId}`);
+        setFridges([...fridges].filter(fridge => fridge._id !== fridgeId));
+    
+        console.log([...fridges].filter(fridge => fridge._id !== fridgeId));
+        console.log(fridges);
+    }
+
     return <div>
         <p>HOLA </p>
         {fridges.length > 0 &&
             <div>
             {fridges.map((data, i) => (
-                <>
-                <FridgeRow key={i} fridge={data} />
-                </>
+                <FridgeRow key={data._id} fridge={data} onDelete={fridgeDeleted} token={token}/>
             ))}    
             </div>}
         {addFridge ? 

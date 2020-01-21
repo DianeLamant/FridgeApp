@@ -42,7 +42,7 @@ router.get('/:fridgeId', async (req, res) => {
 // DELETE FRIDGE
 router.delete('/:fridgeId', async (req, res) => {
     try {
-        const removedFridge = await Fridge.remove({_id: req.params.fridgeId})
+        const removedFridge = await Fridge.deleteOne({_id: req.params.fridgeId})
         res.json(removedFridge)
     }catch(err) {
         res.json({message: err})
@@ -68,14 +68,14 @@ router.patch('/:fridgeId', async (req, res) => {
 
 // ADD USER IN FRIDGE
 router.post('/addUser/:fridgeId', async (req, res) => {
-    try {
-        // Look if user id is already link to the fridge
-        const fridge = await Fridge.findById(req.params.fridgeId);
-        for(let userId of fridge.usersId) {
-            if(userId == req.body.userId) {
-                return res.json({message: err})
-            }
+    // Look if user id is already link to the fridge
+    const fridge = await Fridge.findById(req.params.fridgeId);
+    for(let userId of fridge.usersId) {
+        if(userId == req.body.userId) {
+            return res.json({message: err})
         }
+    }
+    try {
         // Update usersId with the new userId
         const addFridgeUser = await Fridge.update(
             { _id: mongoose.Types.ObjectId(req.params.fridgeId) },

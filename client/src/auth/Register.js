@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 function App(props) {
 
     const [ user, setUser ] = useState({});
+    const [ samePassword, setSamePassword ] = useState(true);
 
     function handleChange(key, value) {
         setUser(prevState=> ({
@@ -38,10 +39,18 @@ function App(props) {
             })
     }
 
+    function confirmPassword(password) {
+        if(password === user.password) {
+            setSamePassword(true);
+        } else {
+            setSamePassword(false);
+        }
+    }
+
     return <div>
         <h3>Register to Fridge App</h3>
         <div className="ui form">
-            <div className="three fields">
+            <div className="four fields">
                 <div className="required field">
                     <label>Name</label>
                     <input 
@@ -64,6 +73,14 @@ function App(props) {
                         type="password" 
                         placeholder="Password"
                         onChange={e => handleChange('password', e.target.value)} 
+                    />
+                </div>
+                <div className={samePassword ? "required field" : "error required field"}>
+                    <label>Confirm your Password</label>
+                    <input 
+                        type="password" 
+                        placeholder="Password"
+                        onChange={e => confirmPassword(e.target.value)} 
                     />
                 </div>
             </div>

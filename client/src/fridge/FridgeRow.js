@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 
 function FridgeRow(props) {
 
-    const { fridge } = props;
-
-    const [ fridgeName, setFridgeName ] = useState(fridge.name);
+    const { onDelete, token } = props;
+    
+    const [ fridge, setFridge ] = useState(props.fridge);
     const [ editFridge, setEditFridge ] = useState(false);
-    const input = React.createRef()
+    const input = React.createRef();
 
     useEffect(() => {
         if(input.current) {
@@ -17,7 +17,10 @@ function FridgeRow(props) {
 
 
     function handleChange(value) {
-        setFridgeName(value);
+        setFridge(prevState => ({
+            ...prevState,
+            name : value
+        }));
     }
 
     function Update() {
@@ -26,11 +29,11 @@ function FridgeRow(props) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({name: fridgeName})
+            body: JSON.stringify({name: fridge.name})
         })
-            .then((res) => res.json())
-            .then(function(fridge) {
-                // console.log(fridge);
+            .then(() => {
+                // setFridge(fridge);
+                
             })
         setEditFridge(false);
     }
@@ -42,35 +45,35 @@ function FridgeRow(props) {
                 'Content-Type': 'application/json',
             },
         })
-            .then((res) => res.json())
-            .then(function(fridge) {
-                // console.log(fridge);
+            .then(() => {
+                onDelete(fridge._id);
             })
     }
 
-    return <Link to={
-        {
-            pathname: `/fridge/${fridgeName}`,
-            fridge: fridge
-        }
-    } >
+    return <div>
       {editFridge ?
         <input 
             ref={input}
             type="text" 
             placeholder="Fridge Name"
-            value={fridgeName}
+            value={fridge.name}
             onChange={e => handleChange(e.target.value)} 
             onBlur={Update}
         />
         : 
-        <div><p>{fridgeName}</p></div>
+        <Link to={
+            {
+                pathname: `/fridge/${fridge._id}`, 
+                fridge: fridge,
+                token: token
+            }
+        }><p>{fridge.name}</p></Link>
         }
         <div onClick={() => setEditFridge(true)}><p>Edit</p></div>
         <div onClick={Delete}><p>Delete</p></div>
         <br></br>
 
-    </Link> 
+        </div> 
 }
 
 export default FridgeRow;

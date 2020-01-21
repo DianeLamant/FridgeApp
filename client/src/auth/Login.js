@@ -22,7 +22,7 @@ function App(props) {
             .then( async (res) => {
                 
                 const msg = await res.text();
-                alert(msg);
+                // alert(msg);
 
                 if(msg.toLowerCase().includes('email')) {
                     console.log('maaail');
