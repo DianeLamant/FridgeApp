@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
 function FormFood(props) {
 
-    console.log(props);
-    const { dates, fridge, formprops, token } = props
+    const history = useHistory();
+
+    const { dates, fridge, token } = props
+ 
     const types = ['Fruits/Légumes', 'Produits laitiers', 'Viandes/Poissons', 'Epicerie' ,'Conserves', 'Boisson']
     const [ foods, setFoods ] = useState(props.foods);
-    console.log(fridge);
     const [ food, setFood ] = useState({type: types[0], fridgeId: props.fridge._id});
-    console.log(foods);
     
     function handleChange(key, value) {
         setFood(prevState=> ({
@@ -18,29 +19,25 @@ function FormFood(props) {
     }
 
     function addFood() {
-        console.log(food);
-        
         fetch('http://localhost:3800/api/food/', {
             method: 'POST',
             headers: {
-                // 'auth-token': token,
+                'auth-token': token,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(food)
         })
             .then((res) => res.json())
             .then(function(data) {
-                console.log(data);
-                
                 setFoods(prevState=> ({
                     ...prevState,
                     food
                 }))
-                formprops.history.push(`/fridge/${fridge.name}`, {fridge: fridge, token: token});
+                history.push(`/fridge/${fridge.name}`, {fridge: fridge, token: token});
             })
     }
     
-    return <div>
+    return <>
         <div className="ui form">
             <div className="three fields">
                 <div className="field">
@@ -77,7 +74,7 @@ function FormFood(props) {
                 onClick={addFood}    
             >Send</button>
         </div>
-    </div> 
+    </> 
 }
 
 export default FormFood;

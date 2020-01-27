@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 function FoodRow(props) {
   
-    const { onDelete, filter } = props;
+    const { fridgeId, onDelete, filter, token } = props;
 
     const [ food, setFood ] = useState(props.food);
     const [ editFood, setEditFood ] = useState(false);
@@ -25,6 +25,7 @@ function FoodRow(props) {
         fetch(`http://localhost:3800/api/food/${food._id}`, {
             method: 'PATCH',
             headers: {
+                'auth-token': token,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(food)
@@ -40,8 +41,10 @@ function FoodRow(props) {
         fetch(`http://localhost:3800/api/food/${food._id}`, {
             method: 'DELETE',
             headers: {
+                'auth-token': token,
                 'Content-Type': 'application/json',
             },
+            body: JSON.stringify({fridgeId: fridgeId})
         })
             .then(() => {
                 onDelete(food._id);

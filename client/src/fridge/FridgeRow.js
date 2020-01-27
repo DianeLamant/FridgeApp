@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 function FridgeRow(props) {
 
+    const history = useHistory();
+    
     const { onDelete, token } = props;
     
     const [ fridge, setFridge ] = useState(props.fridge);
@@ -27,6 +29,7 @@ function FridgeRow(props) {
         fetch(`http://localhost:3800/api/fridge/${fridge._id}`, {
             method: 'PATCH',
             headers: {
+                'auth-token': token,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({name: fridge.name})
@@ -42,6 +45,7 @@ function FridgeRow(props) {
         fetch(`http://localhost:3800/api/fridge/${fridge._id}`, {
             method: 'DELETE',
             headers: {
+                'auth-token': token,
                 'Content-Type': 'application/json',
             },
         })
@@ -61,13 +65,9 @@ function FridgeRow(props) {
             onBlur={Update}
         />
         : 
-        <Link to={
-            {
-                pathname: `/fridge/${fridge._id}`, 
-                fridge: fridge,
-                token: token
-            }
-        }><p>{fridge.name}</p></Link>
+        <div onClick={() => history.push(`/fridge/${fridge._id}`, {fridge: fridge, token: token})}>
+            <p>{fridge.name}</p>
+        </div>
         }
         <div onClick={() => setEditFridge(true)}><p>Edit</p></div>
         <div onClick={Delete}><p>Delete</p></div>

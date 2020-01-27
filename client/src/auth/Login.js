@@ -29,6 +29,7 @@ function App(props) {
                 } else if (msg.toLowerCase().includes('password')) {
                     console.log('passssword');
                 } else {
+                    console.log(msg)
                     props.history.push('/home', {token: msg})
                 }
                 

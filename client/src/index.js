@@ -5,8 +5,9 @@ import { useHistory } from 'react-router-dom';
 
 import Login from './auth/Login';
 import Register from './auth/Register';
-import FridgesList from './fridge/FridgesList';
+import App from './App';
 import FridgeDetails from './fridge/FridgeDetails';
+import FridgeUsers from './fridge/FridgeUsers';
 import FormFood from './food/FormFood'; 
 
 function NotFound() {
@@ -31,9 +32,10 @@ const routing = (
         <Switch>
           <Route exact path="/" component={Login}/>
           <Route exact path="/register" component={Register}/>
-          <Route exact path="/home" component={FridgesList}/>
+          <Route exact path="/home" component={App}/>
           <Route path="/fridge/:fridgeParam" component={FridgeDetails} />
-          <Route path="/addfood" component={FormFood} />
+          <Route exact path="/home" component={App}/>
+          <Route path="/fridge-users" component={FridgeUsers} />
           <Route component={NotFound} />
         </Switch>
       </>

@@ -3,8 +3,8 @@ import SecondForm from './SecondForm';
 
 function FormFood(props) {
 
-    console.log(props);
-    const { fridge, foods, token } = props.history.location
+    const { fridge, foods, token } = props.history.location;
+    
     const [ isFirstForm, setIsFirstForm ] = useState(true);
     const [ dates, setDates ] = useState([])
 
@@ -12,7 +12,6 @@ function FormFood(props) {
         setDates(dates);
         setIsFirstForm(false);
     }
-    console.log(isFirstForm);
     
     return <>
         {isFirstForm ?
@@ -25,7 +24,7 @@ function FormFood(props) {
             </ul>
         </div> 
         :  
-        <SecondForm token={token} dates={dates} fridge={fridge} foods={foods} formprops={props}/>
+        <SecondForm token={token} dates={dates} fridge={fridge} foods={foods} />
         }
         </>
 }

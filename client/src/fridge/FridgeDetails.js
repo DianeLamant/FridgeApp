@@ -1,15 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import FoodRow from '../food/FoodRow'
+import FoodRow from '../food/FoodRow';
+
+const styleSheet = {
+    header: {
+      width: '100%',
+      height: '20%',
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center'
+    },
+    title: {
+        margin: '0 0 0 20px',
+        width: '80%',
+        height: '100%',
+        fontSize: '2em',
+    },
+    icon: {
+        width: '20%',
+        height: '100%',
+    },
+    img: {
+        width: '50%',
+        position: 'relative',
+        left: '50%',
+        transform: 'translateX(-50%)'
+    }
+};
 
 function FridgeDetails(props) {
 
-    console.log(props);
-    if(props.location.fridge === undefined) {
-        var { fridge } = props.location.state;
-    } else {
-        var { fridge, token } = props.location;
-    }
+    const { fridge, token } = props.location.state;
     
     const [ foods, setFoods ] = useState([]);
     const [ filter, setFilter ] = useState('expiryDate')
@@ -18,32 +39,35 @@ function FridgeDetails(props) {
         fetch(`http://localhost:3800/api/food/${filter}/${fridge._id}`, {
             method: 'GET',
             headers: {
-                // 'auth-token': token,
+                'auth-token': token,
                 'Content-Type': 'application/json',
             },
         })
         .then((res) => res.json())
         .then((foods) => {
             setFoods(foods);
-            console.log('foods', foods);
-        })
-        .then(() => {
-            console.log(foods);
-            
         })
     }, [filter])
 
     const foodDeleted = foodId => {
-        console.log(`I delete: ${foodId}`);
         setFoods([...foods].filter(food => food._id !== foodId));
-    
-        console.log([...foods].filter(food => food._id !== foodId));
-        console.log(foods);
     }
     
 
     return <div>
-        <h1>{fridge.name}</h1>
+        <div style={styleSheet.header}>
+            <div 
+                className="ui icon"
+                onClick={() => props.history.push('/home', {token: token})}    
+            ><i className="left arrow icon"></i></div>
+            <h1 style={styleSheet.title}>{fridge.name}</h1>
+            <div 
+                style={styleSheet.icon}
+                onClick={() => props.history.push('/fridge-users', {token: token, fridge: fridge})}
+            >
+                <img style={styleSheet.img} src='../svg/group-linear.svg'></img>
+            </div>
+        </div>
         <div className="ui horizontal list">
             <div className="item" onClick={() => setFilter('expiryDate')}><p>Expiry Date</p></div>
             <div className="item" onClick={() => setFilter('openingDate')}><p>Opening Date</p></div>
@@ -53,7 +77,7 @@ function FridgeDetails(props) {
         <div className="ui list">
 
             {foods.map(data => (
-                <FoodRow key={data._id} food={data} onDelete={foodDeleted} filter={filter}/>
+                <FoodRow key={data._id} token={token} fridgeId={fridge._id} food={data} onDelete={foodDeleted} filter={filter}/>
             ))}
         </div>
         }

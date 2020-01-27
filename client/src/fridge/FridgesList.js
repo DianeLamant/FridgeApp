@@ -3,11 +3,20 @@ import FridgeRow from './FridgeRow';
 
 function FridgesList(props) {
 
-    const token = props.location.state.token;
+    const { token } = props;
+
     const [ fridges, setFridges ] = useState([]);
     const [ addFridge, setAddFridge ] = useState(false);
     const [ fridgeName, setFridgeName ] = useState({name: ''});
-    
+
+    const input = React.createRef();
+
+    useEffect(() => {
+        if(input.current) {
+            input.current.focus()
+        }
+    }, [addFridge])
+
     useEffect(() => {
         fetch('http://localhost:3800/api/fridge/', {
             method: 'GET',
@@ -18,7 +27,6 @@ function FridgesList(props) {
         })
             .then((res) => res.json())
             .then(function(data) {
-                console.log('les fridges:', data);
                 setFridges(data);
             })
     }, [])
@@ -38,7 +46,7 @@ function FridgesList(props) {
                 setFridges(prevState => {
                     return [...prevState, fridge];
                 })
-                // props.history.push(`/fridge/${fridge.name}`, {fridge: fridge});
+                // props.history.push(`/fridge/${fridge.name}`, {token: token, fridge: fridge});
             })
     }
 
@@ -47,15 +55,10 @@ function FridgesList(props) {
     }
 
     const fridgeDeleted = fridgeId => {
-        console.log(`I delete: ${fridgeId}`);
         setFridges([...fridges].filter(fridge => fridge._id !== fridgeId));
-    
-        console.log([...fridges].filter(fridge => fridge._id !== fridgeId));
-        console.log(fridges);
     }
 
     return <div>
-        <p>HOLA </p>
         {fridges.length > 0 &&
             <div>
             {fridges.map((data, i) => (
@@ -65,13 +68,15 @@ function FridgesList(props) {
         {addFridge ? 
         <>
             <input 
+                ref={input}
                 type="text" 
                 placeholder="Fridge Name"
                 onChange={e => handleChange(e.target.value)} 
+                // onBlur={() => setAddFridge(false)}
             />
             <button 
                 className="ui inverted green button"
-                onClick={handleSubmit}    
+                onClick={handleSubmit}
             >Validate</button>
         </>
         :
