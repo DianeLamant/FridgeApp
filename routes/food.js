@@ -89,18 +89,32 @@ router.post('/', verify, async (req, res) => {
             type: req.body.type,
             fridgeId: mongoose.Types.ObjectId(req.body.fridgeId)
         });
+
+        if(req.body.expiryDate === undefined && req.body.openingDate === undefined && req.body.purchaseDate === undefined) {
+            return res.json({message: 'Date field is not completed'})
+        }
+
+        if(new Date(req.body.expiryDate) < new Date(Date.now())) {
+            return res.json({message: 'Expiry date earlier than today'})
+        }
+        if(new Date(req.body.openingDate) > new Date(Date.now())) {
+            return res.json({message: 'Opening date later than today'})
+        }
+        if(new Date(req.body.purchaseDate) > new Date(Date.now())) {
+            return res.json({message: 'Purchase date later than today'})
+        }
         
         // Check if fridge exists
         const fridge = await Fridge.findById(food.fridgeId);
         if(fridge === null) {
             return res.status(400).json({message: "fridgeId is undefined or doesn't exist"})
         }
-        
+
         try {
             const savedFood = await food.save()
             res.json(savedFood)
         } catch (err) {
-            res.status(400).json({message: err})
+            res.status(400).json(err)
         }
     } else {
         return check;

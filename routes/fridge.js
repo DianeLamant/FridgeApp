@@ -9,6 +9,8 @@ const User = require('../models/User');
 const Fridge = require('../models/Fridge');
 var food = require('./food');
 
+const { emailValidation } = require('../validation');
+
 var transport = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     auth: {
@@ -42,14 +44,23 @@ router.post('/', verify, async (req, res) => {
 
 });
 
-// GET SPECIFIC FRIDGE
-// --- NOT USED
-router.get('/:fridgeId', async (req, res) => {
+// GET SPECIFIC FRIDGE USERS
+router.get('/:fridgeId', verify, async (req, res) => {
     try {
-        const fridge = await Fridge.findById(req.params.fridgeId)
-        res.json(fridge)
+        const fridge = await Fridge.findById(req.params.fridgeId);
+        let users = [];
+        // For each user in users fridge
+        for(let userId of fridge.usersId) {
+
+            // Check if user isn't reqUser
+            if(userId != req.user._userId) {
+                const user = await User.findById(userId);
+                users.push({name: user.name, email: user.email});
+            }
+        }
+        res.json(users)
     }catch(err) {
-        res.status(400).json({message: 'Fridge not found'})
+        res.status(400).json({message: err})
     }
 })
 
@@ -97,9 +108,15 @@ router.patch('/:fridgeId', verify, async (req, res) => {
 
 // ADD USER IN FRIDGE
 router.post('/addUser', verify, async (req, res) => {
+    // VALIDATE DATA
+    const { error } = emailValidation({email: req.body.userEmail});
+    if(error) return res.status(415).send(error.details[0].message);
+
+    // Check if user exist
     const user = await User.findOne({email: req.body.userEmail});
     const fridge = await Fridge.findById(req.body.fridgeId);
     
+    // If user doesn't exists, send mail
     if(user === null) {
         const reqUser = await User.findById(req.user._userId);
         const message = {
@@ -112,16 +129,17 @@ router.post('/addUser', verify, async (req, res) => {
         
         transport.sendMail(message, function(err, info) {
             if (err) {
-              res.json(err)
+              res.status(400).json(err)
             } else {
-              res.json(info);
+              res.status(202).json('Email send to ' + req.body.userEmail);
             }
         });
+    // If user exists, add it to the fridge
     } else {
         // Look if user id is already link to the fridge
         for(let userId of fridge.usersId) {
             if(userId.toString() === user._id.toString()) {
-                return res.status(400).json({message: 'User is already in the fridge'})
+                return res.status(208).json('User is already in the fridge')
             } 
         }
 
@@ -131,10 +149,10 @@ router.post('/addUser', verify, async (req, res) => {
                 { _id: mongoose.Types.ObjectId(fridge._id) },
                 { $push: { usersId: mongoose.Types.ObjectId(user._id) } },
             );
-            res.json('ok')
+            res.status(201).json({name: user.name, email: user.email})
             
         } catch (err) {
-            res.status(400).json({message: err})
+            res.status(400).json(err)
         }
     }
     

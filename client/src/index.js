@@ -1,46 +1,89 @@
-import React from 'react';
+import React, { useEffect, useContext, useReducer } from 'react';
 import ReactDOM from 'react-dom';
-import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
-import { useHistory } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
+import { initialState, reducer, GlobalState } from './store';
 
-import Login from './auth/Login';
-import Register from './auth/Register';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import App from './App';
-import FridgeDetails from './fridge/FridgeDetails';
-import FridgeUsers from './fridge/FridgeUsers';
-import FormFood from './food/FormFood'; 
 
-function NotFound() {
+const Reducer = () => {
 
-  const history = useHistory();
+  const [ state, dispatch ] = useReducer(reducer, initialState);
+
   return <>
-    <h1>Not Found</h1>
-      <div 
-      className="ui inverted blue animated button" 
-      onClick={() => history.goBack()}>
-        <div className="hidden content">Go back</div>
-        <div className="visible content">
-        <i className="left arrow icon"></i>
-      </div>
-    </div>
+      <GlobalState.Provider value={{state, dispatch}}>
+          <Routing />
+      </GlobalState.Provider>
+          
   </>
 }
 
-const routing = (
-    <Router>
-      <>
-        <Switch>
-          <Route exact path="/" component={Login}/>
-          <Route exact path="/register" component={Register}/>
-          <Route exact path="/home" component={App}/>
-          <Route path="/fridge/:fridgeParam" component={FridgeDetails} />
-          <Route exact path="/home" component={App}/>
-          <Route path="/fridge-users" component={FridgeUsers} />
-          <Route component={NotFound} />
-        </Switch>
-      </>
-  
-    </Router>
-)
+function Routing() {
 
-ReactDOM.render(routing, document.getElementById('root'))
+  const { dispatch, state: { isLogged } } = useContext(GlobalState);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    
+    if(token) {
+      dispatch({
+        type: 'setIsLogged',
+        payload: { isLogged: true },
+      });
+      dispatch({
+        type: 'setToken',
+        payload: { token: token },
+      });
+      fetch('http://localhost:3800/api/user/', {
+            method: 'GET',
+            headers: {
+                'auth-token': token,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then((res) => res.json())
+        .then(function(user) {
+              dispatch({
+                type: 'setUser',
+                payload: { user: user },
+              });
+                
+            })
+
+    } else {
+      dispatch({
+        type: 'setIsLogged',
+        payload: { isLogged: false },
+      });
+      dispatch({
+        type: 'setToken',
+        payload: { token: '' },
+      });
+    }
+        
+  }, [])
+
+  // console.log(isLogged);
+  
+
+    return <Router>
+        <Switch>
+          <Route path="/login" component={Login}/>
+          <Route path="/register" component={Register}/>
+          <Route path="/" component={App}/>
+          {/* <Route path="/fridge/:fridgeParam" component={FridgeDetails} />
+          <Route path="/fridge-users" component={FridgeUsers} />
+          <Route path="/addfood" component={FormFood} />
+          <Route component={NotFound} /> */}
+        </Switch>
+        {isLogged ? 
+          <Redirect to='/' />
+          :
+          <Redirect to='/login' />
+        }
+    
+      </Router>
+}
+
+ReactDOM.render(<Reducer />, document.getElementById('root'))
